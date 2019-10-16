@@ -1,2 +1,2 @@
 # Crossword-Generator
-Python application that makes use of a Trie and depth first search to generate random crossword puzzles from a 
+Python application that generates a random crossword puzzle from a randomly generated subset of letters.
