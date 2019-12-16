@@ -1,4 +1,5 @@
 import random
+import tkinter
 class CrossWord:
 	def __init__(self,dimensions,wordList,letters,wordCount):
 		self.crosswordGrid = [[0 for i in range(dimensions)] for j in range(dimensions)]
@@ -23,8 +24,8 @@ class CrossWord:
 		#Start building crossword from longest possible word
 		startingWord = self.wordList[-1]
 		#Randomly insert word into an available space on the board
-		initialX = random.randrange(0,15 - len(startingWord))
-		initialY = random.randrange(0,15 - len(startingWord))
+		initialX = random.randrange(0,len(self.crosswordGrid) - len(startingWord))
+		initialY = random.randrange(0,len(self.crosswordGrid) - len(startingWord))
 		self.usedWords[startingWord] = [initialX,initialY,'v']
 		for i in range(len(startingWord)):
 			self.crosswordGrid[initialX + i][initialY] = startingWord[i]
@@ -229,29 +230,50 @@ class CrossWord:
 			return 0
 		return 1
 
-	def displayCrossWord(self):
-		print("")
-		for row in range(len(self.crosswordGrid)):
-			for col in range(len(self.crosswordGrid[0])):
-				if self.crosswordGrid[row][col] == 0:
-					print("   ",end = "")
-				elif self.revealed[row][col] == True:
-					print(" " + self.crosswordGrid[row][col] + " ",end = "")
-				else:
-					print(" # ",end = "")
-			print("")
 
-	def displayRevealedCrossWord(self):
-		print("")
+	def displayCrossWordTKinter(self,DisplayWindow,letters):
 		for row in range(len(self.crosswordGrid)):
 			for col in range(len(self.crosswordGrid[0])):
-				if self.crosswordGrid[row][col] == 0:
-					print("   ",end = "")
-				else:
-					print(" " + self.crosswordGrid[row][col] + " ",end = "")
-			print("")
+				if self.crosswordGrid[row][col] != 0:
+					if self.revealed[row][col] == False:
+						tkinter.Label(DisplayWindow, text="",
+			        	 borderwidth=2,relief = "solid" ,font = (16),width = 3).grid(row=row+1,column=col)
+					else:
+						tkinter.Label(DisplayWindow, text=self.crosswordGrid[row][col],
+			        	 borderwidth=2,relief = "solid" ,font = (16),width = 3).grid(row=row+1,column=col)
+
+		DisplayWindow.update()
+
+
+	def initCrossWordTKinter(self,DisplayWindow,letters):
+		for row in range(len(self.crosswordGrid)):
+			for col in range(len(self.crosswordGrid[0])):
+				if self.crosswordGrid[row][col] != 0:
+					if self.revealed[row][col] == False:
+						tkinter.Label(DisplayWindow, text="",
+			        	 borderwidth=2,relief = "solid" ,font = (16),width = 3).grid(row=row + 1,column=col)
+					else:
+						tkinter.Label(DisplayWindow, text=self.crosswordGrid[row][col],
+			        	 borderwidth=2,relief = "solid" ,font = (16),width = 3).grid(row=row + 1,column=col)
+
+		tkinter.Label(DisplayWindow,text = "Available Letters:",font = (16)).grid(row = row + 2,columnspan = len(self.crosswordGrid))
+		tkinter.Label(DisplayWindow,text = letters,font = (16)).grid(row = row + 3,columnspan = len(self.crosswordGrid))
+		EntryObj = tkinter.Entry(DisplayWindow)
+		EntryObj.grid(row= row + 4, columnspan = len(self.crosswordGrid))
+		
+		DisplayWindow.update()
+		return EntryObj
+
+
+	def displayWinScreen(self,DisplayWindow):
+		#Updates the GUI with a label that says YOU WIN and displays it
+		tkinter.Label(DisplayWindow, text="YOU WIN!!!",
+			        	 borderwidth=2,relief = "solid" ,font = (26)).grid(row=0,column=0,columnspan = len(self.crosswordGrid) ,rowspan = len(self.crosswordGrid))
+		tkinter.Button(DisplayWindow, text="Quit", command=Reveal).grid(row = len(self.crosswordGrid) + 4, column = len(self.crosswordGrid) + 4, columnspan = len(self.crosswordGrid))
+		DisplayWindow.update()
 
 	def reveal(self,guess):
+		#Reveals the word in the crossword
 		x = self.usedWords[guess][0]
 		y = self.usedWords[guess][1]
 		direction = self.usedWords[guess][2]

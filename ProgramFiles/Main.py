@@ -1,5 +1,6 @@
 import os
 import random
+import tkinter
 from DictionaryTrie import Trie 
 from CrossWord import CrossWord
 
@@ -89,7 +90,6 @@ def populateTrie(MainTrie):
 
 	return MainTrie
 
-
 def setUpTrie():
 	#Setup up our Trie and populate it with the contents of the dictionary
 	MainTrie = Trie("")
@@ -98,10 +98,14 @@ def setUpTrie():
 
 	return MainTrie
 
+
+#Initialize Variables
 MainTrie = setUpTrie()
 ready = False
-crossWordSize = 20
-numberOfWords = 30
+crossWordSize = 10 # This represents the size of the N*N crossword
+numberOfWords = 4 # This represents the number of words to put in the crossword
+minWordSize = 3  #Minimum word length
+maxWordSize = 8 #Maximum word length
 #Until we get a valid crossword continue to attempt to create one
 while not ready:
 
@@ -112,26 +116,43 @@ while not ready:
 
 	wordList = {}
 	#Get all words that contain the randomly generated letters
-	MainTrie.getAllConstrainedWords(3,8,letters,wordList)
+	MainTrie.getAllConstrainedWords(minWordSize,maxWordSize,letters,wordList)
 	lengthSortedWordList = sorted(list(wordList.keys()),key = len)
 	crossWord = CrossWord(crossWordSize,lengthSortedWordList,letters,numberOfWords)
 	ready = crossWord.makeCrossWord()
-#print(letters)
-#print(lengthSortedWordList)
-#crossWord.displayCrossWord()
 #At this point we have a completed crossword
 #We have letters and a list of words
-
-finished = False
-while(not finished):
-	os.system('cls')
-	crossWord.displayCrossWord()
-	print(letters)
-	if not crossWord.usedWords:
-		finished = True
-		print("You Win!!!")
-		break
-	guess = input()
+#GUI
+def makeGuess(event):
+	#Checks the guess, updates GUI
+	guess = entryObj.get()
 	if guess in crossWord.usedWords:
 		crossWord.reveal(guess)
 		del crossWord.usedWords[guess]
+	if not crossWord.usedWords:
+		crossWord.displayCrossWordTKinter(DisplayWindow,letters)
+		crossWord.displayWinScreen(DisplayWindow)
+		return
+	entryObj.delete(0, 'end')
+	crossWord.displayCrossWordTKinter(DisplayWindow,letters)
+
+def exit():
+	#Destroys display window
+	DisplayWindow.destroy()
+
+def Reveal():
+	#Reveals all words and provides a quit button
+	tkinter.Button(DisplayWindow, text="  Quit  ", command=exit).grid(row = 0, column = 0, columnspan = crossWordSize)
+	for word in crossWord.usedWords:
+		crossWord.reveal(word)
+	crossWord.displayCrossWordTKinter(DisplayWindow,letters)
+
+#Initialize tkinter GUI
+DisplayWindow = tkinter.Tk()
+tkinter.Button(DisplayWindow, text="Reveal", command=Reveal).grid(row = 0, column = 0, columnspan = crossWordSize)
+entryObj = crossWord.initCrossWordTKinter(DisplayWindow,letters)
+#Binds the enter key to the makeGuess function
+DisplayWindow.bind('<Return>', makeGuess)
+#Start the GUI
+DisplayWindow.mainloop()
+
